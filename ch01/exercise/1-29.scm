@@ -1,0 +1,20 @@
+(load "../example/1-3-1-procedure.scm")
+
+(define (integral-new f a b n)
+  (define h (/ (- b a) n))
+  (define (y k)
+    (f (+ a (* k h))))
+  (define (factor k)
+    (cond ((or (= k 0) (= k n))
+           1)
+          ((odd? k)
+           4)
+          (else
+           2)))
+  (define (integral-term k)
+    (* (factor k) (y k)))
+  (* (/ h 3)
+     (sum integral-term 0 inc n)))
+
+(integral-new cube 0 1 1000)
+(integral cube 0 1 0.001)
