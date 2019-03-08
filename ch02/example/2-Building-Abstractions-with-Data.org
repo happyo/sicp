@@ -1,0 +1,33 @@
+* 2.1 Introduction to Data Abstraction
+** 2.1.1 Example:Arithmetic Operations for Rational Numbers
+** 2.1.2 Abstraction Barriers
+   The horizontal lines represent *abstraction barriers* that isolate different "levels" of System.At each level, the barrier sperates the programs (above) that use the data abstraction from the programs (below) that implement the data abstration.
+** 2.1.3 What is Meant by Data?
+   In general, we can think of data as defined by some collection of selectors and constructors, together with specified conditions that these procedures must fulfill in order to be a valid representation.
+   #+BEGIN_SRC scheme
+     (define (cons x y)
+       (define (dispatch m)
+         (cond ((= m 0) x)
+               ((= m 1) y)
+               (else (error "Argument not 0 or 1: CONS" m))))
+       dispatch)
+     (define (car z) (z 0))
+     (define (cdr z) (z 1))
+
+
+   #+END_SRC
+** 2.1.4 Extended Exercise: Interval Arithmetic
+
+* 2.2 Hierarchical Data and the Closure Property 
+  In this representation, which is called */box-and-pointer notation/*, each object is shown as a pointer to a box.
+** 2.2.1 Representing Sequences
+   One of the useful structures we can build with pairs is a *sequence*-an ordered collection of data objects.
+   #+BEGIN_SRC scheme
+     (cons 1
+           (cons 2
+                 (cons 3
+                       (cons 4 nil))))
+
+     (list <a1> <a2> ... <an>)
+   #+END_SRC
+   Such a sequence of pairs, formed by nested conses, is called a *list*, and Scheme provides a primitive called *list* to help constructing lists.
