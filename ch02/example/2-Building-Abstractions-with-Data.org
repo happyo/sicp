@@ -114,3 +114,18 @@
        (map (lambda (x) (* x factor))
             items))
    #+END_SRC
+** 2.2.2 Hierarchical Structures
+   The representation of sequences in terms of lists generalizes naturally to represent sequences whose elements may themselves be sequences.
+   Another way to think of sequences whose elements are sequences is as *trees*.The elements of the sequences are branches of the tree, and elements that are themselves sequences are subtrees.
+   #+BEGIN_SRC scheme
+     (define x (cons (list 1 2) (list 3 4)))
+     (length x)
+     3
+     (count-leaves x)
+     4
+     (define (count-leaves x)
+       (cond ((null? x) 0)
+             ((not (pair? x)) 1)
+             (else (+ (count-leaves (car x))
+                      (count-leaves (cdr x))))))
+   #+END_SRC
