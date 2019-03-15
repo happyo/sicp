@@ -332,3 +332,75 @@
 
       (origin-frame a-frame)
     #+END_SRC
+*** Painters
+    A painter is represented as a procedure that, given a frame as argument, draws a particular image shifted and scaled to fit the frame.
+    #+BEGIN_SRC scheme
+      (define (segments->painter segment-list)
+        (lambda (frame)
+          (for-each
+           (lambda (segment)
+             (draw-line
+              ((frame-coord-map frame)
+               (start-segment segment))
+              ((frame-coord-map frame)
+               (end-segment segment))))
+           segment-list)))
+    #+END_SRC
+    Representing painters as procedures erects a powerful abstration barrier in the picture language.We can create and intermix all sorts of primitive painters, based on a variety of graphics capabilities.The details of their implementation do not matter.
+*** Transforming and combining painter
+    Thus, for example, flip-vert doesn't have to know how a painter works in order to flip it-it just has to know how to turn a frame upside down:The flipped painter just uses the original painter, but in the inverted frame.
+    #+BEGIN_SRC scheme
+      (define (transform-painter painter origin corner1 corner2)
+        (lambda (frame)
+          (let ((m (frame-coord-map frame)))
+            (let ((new-origin (m origin)))
+              (painter (make-frame
+                        new-origin
+                        (sub-vect (m corner1) new-origin)
+                        (sub-vect (m corner2) new-origin)))))))
+
+      (define (flip-vert painter)
+        (transform-painter painter
+                           (make-vect 0.0 1.0) ; new origin
+                           (make-vect 1.0 1.0) ; new end of edge1
+                           (make-vect 0.0 0.0))) ; new end of edge2
+
+      (define (shrink-to-upper-right painter)
+        (transform-painter
+         painter (make-vect 0.5 0.5)
+         (make-vect 1.0 0.5) (make-vect 0.5 1.0)))
+
+      (define (rotate90 painter)
+        (transform-painter painter
+                           (make-vect 1.0 0.0)
+                           (make-vect 1.0 1.0)
+                           (make-vect 0.0 0.0)))
+
+      (define (squash-inwards painter)
+        (transform-painter painter
+                           (make-vect 0.0 0.0)
+                           (make-vect 0.65 0.35)
+                           (make-vect 0.35 0.65)))
+    #+END_SRC
+    Frame transformation is also the key to defining means of combining two or more painters.
+    #+BEGIN_SRC scheme
+      (define (beside painter1 painter2)
+        (let ((split-point (make-vect 0.5 0.0)))
+          (let ((paint-left
+                 (transform-painter
+                  painter1
+                  (make-vect 0.0 0.0)
+                  split-point
+                  (make-vect 0.0 1.0)))
+                (paint-right
+                 (transform-painter
+                  painter2
+                  split-point
+                  (make-vect 1.0 0.0)
+                  (make-vect 0.5 1.0))))
+            (lambda (frame)
+              (paint-left frame)
+              (paint-right frame)))))
+    #+END_SRC
+    The beside procedure need not know anything about the details of the component painters other than that each painter will draw something in its designated frame.
+*** Levels of language for robust design
