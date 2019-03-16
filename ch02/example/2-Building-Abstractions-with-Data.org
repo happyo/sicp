@@ -404,3 +404,41 @@
     #+END_SRC
     The beside procedure need not know anything about the details of the component painters other than that each painter will draw something in its designated frame.
 *** Levels of language for robust design
+    The means of combination satisfy the closure property, which permits us to easily build up complex designs.Finally, all the tools for abstracting procedures are available to us for abstracting means of combination for painters.
+    This is approach of *statified design*, the notion that a complex system should be structured as a sequence of levels that are described using a sequence of languages.Each level is constructed by combining parts that are regarded as primitives at the next level.
+    Stratified design helps make program *robust*, that is, it makes it likely that small changes in a specification will require correspondingly small changes in the program
+* 2.3 Sybolic Data
+  In this section we extend the presentational capability of our language by introducing the ability to work with arbitrary symbols as data.
+** 2.3.1 Quatation
+   In order to manipulate symbols we need a new element in our language: the ability to *quote* a data object. 
+   #+BEGIN_SRC scheme
+     (define a 1)
+
+     (define b 2)
+
+     (list a b)
+     (1 2)
+
+     (list 'a 'b)
+     (a b)
+
+     (list 'a b)
+     (a 2)
+
+     (car '(a b c))
+     a
+
+     (cdr '(a b c))
+     (b c)
+
+     (define (memq item x)
+       (cond ((null? x) false)
+             ((eq? item (car x) x))
+             (else (memq item (cdr x)))))
+
+     (memq 'apple '(pear banana prune))
+     false
+
+     (memq 'apple '(x (apple sauce) y apple pear))
+     (apple pear)
+   #+END_SRC
