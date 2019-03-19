@@ -615,4 +615,26 @@
               (else (lookup given-key (cdr set-of-records)))))
 
     #+END_SRC
+** 2.3.4 Exaple: Huffman Encoding Trees
+   Codes such as ASCII and the A-through-H (A 000 B 001 C 010) code above are known as *fixed-length* codes.It is sometimes advantageous to use *variable-length* codes, in which diffrent symbols may be represented by different numbers of bits(A 0 B 100 C 1010).
+   One of the difficulties of using a variable-length code is knowing when you have reached the end of a symbol in reading a sequence of zeros and ones. Morse code solves this problem by using a special *separator code* (in this case, a pause) after the sequence of dots and dashes for each letter. Another solution is to design the code in such a way that no complete code for any symbol is beginning (or prefix) of th code for another symbol.Such a code is called a *prefix code*. 
+*** Generating Huffman trees
+    The idea is to arrange the tree so that the symbols with the lowest frequency appear farthest away from the root. Begin with the set of leaf nodes, containing symblos and their frequencies, as determined by the initial data from which the code is to be constructed. Now find two leaves with the lowest weights and merge them to produce a node that has these two nodes as its left and right branches. The weight of the new node is the sum of the two weights. Remove the two leaves from the original set and replace them by this new node. Now continue this process. At each step, merge two nodes with the smallest weights, removing them from the set and replacing them with a node that has these two as its left and right branches. The process stops when there is only one node left, which is the root of the entire tree. Here is how the Huffman tree of Figure 2.18 was generated:
+    Initial leaves {(A 8) (B 3) (C 1) (D 1) (E 1) (F 1) (G 1) (H 1)}
+             Merge {(A 8) (B 3) ({C D} 2) (E 1) (F 1) (G 1) (H 1)}
+             Merge {(A 8) (B 3) ({C D} 2) ({E F} 2) (G 1) (H 1)}
+             Merge {(A 8) (B 3) ({C D} 2) ({E F} 2) ({G H} 2)}
+             Merge {(A 8) (B 3) ({C D} 2) ({E F G H} 4)}
+             Merge {(A 8) ({B C D} 5) ({E F G H} 4)}
+             Merge {(A 8) ({B C D E F G H} 9)}
+       Final Merge {{A B C D E F G H} 17)}
+*** Representing Huffman trees
+    #+BEGIN_SRC scheme
+      (define (make-leaf symbol weight) (list 'leaf symbol weight))
 
+      (define (leaf? object) (eq? (car object) 'leaf))
+
+      (define (symbol-leaf x) (cadr x))
+
+      (define (weight-leaf x) (caddr x))
+    #+END_SRC
