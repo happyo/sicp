@@ -695,3 +695,74 @@
                                      (cadr pair)) ; frequency
                           (make-leaf-set (cdr pairs))))))
     #+END_SRC
+* 2.4 Multiple Representations for Abstract Data
+  We have introduced data abstraction, a methodology for structuring systems in such a way that much of a program can be specified independent of the choices involved in implementing the data objects that the program manipulates.
+  These data-abstraction barriers are powerful tools for controlling complexity. By isolating the underlying representations of data objects, we can divide the task of designing a large program into smaller tasks that can be performed separately. But this kind of data abstraction is not yet powerful enough, because it may not always make sense to speak of "the underlying representation" for a data object.
+  For one thing, there might be more than one useful representation for a data object, and we might like to design systems that can deal with multiple representations.
+  Furthermore, since large programs are often created by combining pre-existing modules that were designed in isolation, we need conventions that permit programmers to incorporate modules into larger system *additively*, that is, without having to redesign or reimplement these modules.
+  In this section, we will learn how to cope with data that may be represented in different ways by different parts of a program. This requires constructing *generic procedures*-procedures that can operate on data that may be represented in more than one way. Our main technique for building generic procedures will be to work in terms of data objects that have *type tags*, that is, data objects that include explicit information about how they are to be processed.We will also discuss *data-directed* programming, a powerful and convenient implementation strategy for additively assembling systems with generic operations.
+** 2.4.1 Representations for Complex Numbers
+   Manipulates
+   #+BEGIN_SRC scheme
+     (make-from-real-img (real-part z) (imag-part z))
+
+     (make-from-mag-ang (magnitude z) (angle z))
+
+     (define (add-complex z1 z2)
+       (make-from-real-img (+ (real-part z1) (real-part z2))
+                           (+ (imag-part z1) (imag-part z2))))
+
+     (define (sub-complex z1 z2)
+       (make-from-real-img (- (real-part z1) (real-part z2))
+                           (- (imag-part z1) (imag-part z2))))
+
+     (define (mul-complex z1 z2)
+       (make-from-mag-ang (* (magnitude z1) (magnitude z2))
+                          (+ (angle z1) (angle z2))))
+
+     (define (div-complex z1 z2)
+       (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
+                          (- (angle z1) (angle z2))))
+   #+END_SRC
+   Rectangular form
+   #+BEGIN_SRC scheme
+     (define (real-part z) (car z))
+
+     (define (imag-part z) (cdr z))
+
+     (define (magnitude z)
+       (sqrt (+ (square (real-part z))
+                (square (imag-part z)))))
+
+     (define (angle z)
+       (atan (imag-part z) (real-part z)))
+
+     (define (make-from-real-imag x y) (cons x y))
+
+     (define (make-from-mag-ang r a)
+       (cons (* r (cos a)) (* r (sin a))))
+
+   #+END_SRC
+   Polar form
+   #+BEGIN_SRC scheme 
+     (define (magnitude z) (car z))
+
+     (define (angle z) (cdr z))
+
+     (define (real-part z) (* (magnitude z) (cos (angle z))))
+
+     (define (imag-part z) (* (magnitude z) (sin (angle z))))
+
+     (define (make-from-real-imag x y)
+       (cons (sqrt (+ (square x) (square y)))
+             (atan y x)))
+
+     (define (make-from-mag-ang r a)
+       (cons r a))
+
+   #+END_SRC 
+   The discipline of data abstraction ensures that the same implementation of manipulates will work either rectangular form or polar form.
+** 2.4.2 Tagged data
+
+   
+   
