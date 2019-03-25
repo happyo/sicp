@@ -847,9 +847,86 @@
               (angle-polar (contents z)))
              (else (error "Unknown type: ANGLE" z))))
    #+END_SRC
-   
-   
 ** 2.4.3 Data-Directed Programming and Additivity
    The general strategy of checking the type of a datum and calling an appropriate procedure is called *dispatching on type*. This is a powerful stategy for obtaining modularity in system design. On the other hand, implementing the dispatch as in section 2.4.2 has tow significant weaknesses. One weakness is that the generic interface procedures (real-part, imag-part, magnitude, and angle) must know about all the different representations. Another weakness of the technique is that even though the individual representations can be designed separately, we must guarantee that no two procedures in the entire system have the same name.
    The issue underlying both of these weaknesses is that the technique for implementing generic interfaces is not *additive*.
    What we need is a means for modularizing the system design even further.This is provided by the programming technique known as *data-directed programming*.
+   Data-directed programming is the technique of designing programs to work with such a table directly.Previously, we implemented the mechanism that interfaces the complex-arithmetic code with the two representation packages as a set of procedures that each perform an explicit dispatch on type. Here we will implement the interface as a single procedure that looks up the combination of the operation name and argument type in the table to find the correct procedure to apply, and then applies it to the contents of the argument.
+   To implement this plan, assume that we have two procedures, *put* and *get*, for manipulating the operation-and-type table:
+   - (put <op> <type> <item>) installs the <item> in the table, indexed by the <op> and the <type>.
+   - (get <op> <type>) looks up the <op>, <type> entry in the table and returns the item found there. If no item is found, get returns false.
+     
+   #+BEGIN_SRC scheme
+     (define (install-rectangular-package)
+       ;; internal procedures
+       (define (real-part z) (car z))
+       (define (imag-part z) (cdr z))
+       (define (make-from-real-imag x y) (cons x y))
+       (define (magnitude z)
+         (sqrt (+ (square (real-part z))
+                  (square (imag-part z)))))
+       (define (angle z)
+         (atan (imag-part z) (real-part z)))
+       (define (make-from-mag-ang r a)
+         (cons (* r (cos a)) (* r (sin a))))
+
+       ;; interface to the rest of the system
+       (define (tag x) (attach-tag 'rectangular x))
+       (put 'real-part '(rectangular) real-part)
+       (put 'imag-part '(rectangular) real-part)
+       (put 'magnitude '(rectangular) magnitude)
+       (put 'angle '(rectangular) angle)
+       (put 'make-from-real-imag 'rectangular
+            (lambda (x y) (tag (make-from-real-imag x y))))
+       (put 'make-from-mag-ang 'rectangular
+            (lambda (r a) (tag (make-from-mag-ang r a))))
+       'done)
+
+     (define (install-polar-package)
+       ;; internal procedures
+       (define (magnitude z) (car z))
+       (define (angle z) (cdr z))
+       (define (make-from-mag-ang r a) (cons r a))
+       (define (real-part z) (* (magnitude z) (cos (angle z))))
+       (define (imag-part z) (* (magnitude z) (sin (angle z))))
+       (define (make-from-real-imag x y)
+         (cons (sqrt (+ (square x) (square y)))
+               (atan y x)))
+
+       ;; interface to the rest of the system
+       (define (tag x) (attach-tag 'polar x))
+       (put 'real-part '(polar) real-part)
+       (put 'imag-part '(polar) imag-part)
+       (put 'magnitude '(polar) magnitude)
+       (put 'angle '(polar) angle)
+       (put 'make-from-real-imag 'polar
+            (lambda (x y) (tag (make-from-real-imag x y))))
+       (put 'make-from-mag-ang 'polar
+            (lambda (r a) (tag (make-from-mag-ang r a))))
+       'done)
+   #+END_SRC
+   The complex-arithmetic selectors access the table by means of a general "operation" procedure called *apply-generic*, which applies a generic operation to some arguments.
+   #+BEGIN_SRC scheme
+     (define (apply-generic op . args)
+       (let ((type-tags (map type-tag args)))
+         (let ((proc (get op type-tags)))
+           (if proc
+               (apply proc (map contents args))
+               (error
+                "No method for these types: APPLY_GENERIC"
+                (list op type-tags))))))
+
+     (define (real-part z) (apply-generic 'real-part z))
+
+     (define (imag-part z) (apply-generic 'imag-part z))
+
+     (define (magnitude z) (apply-generic 'magnitude z))
+
+     (define (angle z) (apply-generic 'angle z))
+
+     (define (make-from-real-imag x y)
+       ((get 'make-from-real-imag 'rectangular) x y))
+
+     (define (make-from-mag-ang r a)
+       ((get 'make-from-mag-ang 'polar) r a))
+   #+END_SRC
