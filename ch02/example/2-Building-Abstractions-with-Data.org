@@ -930,3 +930,16 @@
      (define (make-from-mag-ang r a)
        ((get 'make-from-mag-ang 'polar) r a))
    #+END_SRC
+* 2.5 Systems with Generic Operations
+** 2.5.1 Generic Arithmetic Operations
+** 2.5.2 Combining Data of Different Types
+   #+begin_src scheme
+     (define (scheme-number->complex n)
+       (make-complex-from-real-imag (contents n) 0))
+
+     (put-coercion 'scheme-number
+                   'complex
+                   scheme-number->complex)
+   #+end_src
+*** Hierarchies of types
+** 2.5.3 Example: Symbolic Algebra
