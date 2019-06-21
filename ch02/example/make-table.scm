@@ -34,26 +34,3 @@
 (define operation-table (make-table))
 (define get (operation-table 'lookup-proc))
 (define put (operation-table 'insert-proc!))
-
-;; (define (install-haha-package)
-;;   (define (make-fraction numerator denominator)
-;;     (cons numerator denominator))
-;;   (define (numerator x)
-;;     (car x))
-;;   (define (denominator x)
-;;     (cdr x))
-;;   (define (tag x) (attach-tag 'fraction x))
-;;   (put 'make-fraction 'fraction
-;;        (lambda (x y) (tag (make-fraction x y))))
-;;   (put 'numerator '(fraction) numerator)
-;;   (put 'denominator '(fraction) denominator)
-;;   'done)
-
-;; (install-haha-package)
-
-
-;; (define (numerator x) (apply-generic 'numerator x))
-;; (define (make-fraction x y)
-;;   ((get 'make-fraction 'fraction) x y))
-
-;; (numerator (make-fraction 2 3))
