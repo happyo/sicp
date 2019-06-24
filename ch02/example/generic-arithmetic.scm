@@ -70,7 +70,7 @@
   (define (make-from-real-imag x y)
     ((get 'make-from-real-imag 'rectangular) x y))
   (define (make-from-mag-ang r a)
-    ((get 'make-from-mag-ang 'polar r a)))
+    ((get 'make-from-mag-ang 'polar) r a))
   (define (add-complex z1 z2)
     (make-from-real-imag (+ (real-part z1) (real-part z2))
                          (+ (imag-part z1) (imag-part z2))))
@@ -98,5 +98,6 @@
        (lambda (r a) (tag (make-from-mag-ang r a))))
   'done)
 
+(install-complex-package)
 (define (make-complex-from-real-imag x y) ((get 'make-from-real-imag 'complex) x y))
 (define (make-complex-from-mag-ang r a) ((get 'make-from-mag-ang 'complex) r a))

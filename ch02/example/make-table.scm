@@ -6,13 +6,14 @@
       (let ((subtable (assoc key-1 (cdr local-table))))
         (if subtable
             (let ((record (assoc key-2 (cdr subtable))))
+              ;; (display record)
               (if record
                   (cdr record)
                   #f))
             #f)))
     (define (insert! key-1 key-2 value)
       (let ((subtable
-             (assoc key-2 (cdr local-table))))
+             (assoc key-1 (cdr local-table))))
         (if subtable
             (let ((record (assoc key-2 (cdr subtable))))
               (if record
