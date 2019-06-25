@@ -1,6 +1,7 @@
 (load "tag.scm")
 (load "make-table.scm")
 (load "complex-package.scm")
+(load "../exercise/2-78.scm")
 
 (define (add x y) (apply-generic 'add x y))
 
@@ -10,7 +11,7 @@
 
 (define (div x y) (apply-generic 'div x y))
 
-(define (instal-scheme-number-package)
+(define (install-scheme-number-package)
   (define (tag x) (attach-tag 'scheme-number x))
   (put 'add '(scheme-number scheme-number)
        (lambda (x y) (tag (+ x y))))
@@ -98,6 +99,9 @@
        (lambda (r a) (tag (make-from-mag-ang r a))))
   'done)
 
-(install-complex-package)
 (define (make-complex-from-real-imag x y) ((get 'make-from-real-imag 'complex) x y))
 (define (make-complex-from-mag-ang r a) ((get 'make-from-mag-ang 'complex) r a))
+
+(install-scheme-number-package)
+(install-rational-package)
+(install-complex-package)

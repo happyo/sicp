@@ -6,7 +6,7 @@
       (let ((subtable (assoc key-1 (cdr local-table))))
         (if subtable
             (let ((record (assoc key-2 (cdr subtable))))
-              ;; (display record)
+              (display subtable)
               (if record
                   (cdr record)
                   #f))
