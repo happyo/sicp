@@ -74,8 +74,25 @@
   (if (= n 0)
       the-empty-stream
       (cons (stream-car stream)
-            (take (- n 1)))))
+            (take (- n 1) (stream-cdr stream)))))
 
 (define (fibgen a b) (cons-stream a (fibgen b  (+ a b))))
 
 (define fibs (fibgen 0 1))
+
+;;
+
+(define (sqrt-improve guess x)
+  (average guess (/ x guess)))
+
+(define (average a b)
+  (/ (+ a b)
+     2))
+
+(define (sqrt-stream x)
+  (define guesses
+    (cons-stream
+     1.0
+     (stream-map (lambda (guess) (sqrt-improve guess x))
+                 guesses)))
+  guesses)
