@@ -96,3 +96,39 @@
      (stream-map (lambda (guess) (sqrt-improve guess x))
                  guesses)))
   guesses)
+
+(define (interleave s1 s2)
+  (if (stream-null? s1)
+      s2
+      (cons-stream (stream-car s1)
+                   (interleave s2 (stream-cdr s1)))))
+
+;; Streams as signals
+
+;; (define (integral integrand initial-value dt)
+;;   (define int
+;;     (cons-stream initial-value
+;;                  (add-stream (scale-stream integrand dt)
+;;                              int)))
+;;   int)
+
+;; Streams and Delayed Evaluation
+
+;; (define (solve f y0 dt)
+;;   (define y (integral dy y0 dt))
+;;   (define dy (stream-map f y))
+;;   y)
+
+(define (integral delayed-integrand initial-value dt)
+  (define int
+    (cons-stream
+     initial-value
+     (let ((integrand (force delayed-integrand)))
+       (add-stream (scale-stream integrand dt) int))))
+  int)
+
+(define (solve f y0 dt)
+  (define y (integral (delay dy) y0 dt))
+  (define dy (stream-map f y))
+  y)
+
