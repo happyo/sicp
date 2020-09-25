@@ -1,0 +1,45 @@
+* Metalinguistic Abstraction
+The evaluator, which determines the meaning of expressions in a programming language, is just another program.
+** The Metacircular Evaluator
+An evaluator that is writen in the same language that it evaluates is said to be *metacircular*.
+The metacircular evaluator is essentially a Scheme formulation of the environment model of evaluation described in *Section 3.2*. Recall that the model has two basic parts:
+1. To evaluate a combination (a compound expression other than a special form), evaluate the subexpressions and then apply the value of the operator subexpression to the values of the operand subexpressions.
+2. To apply a compound procedure to a set of arguments, evaluate the body of the procedure in a new environment. To construct this environment, extend the environment part of the procedure object by a frame in which the formal parameters of the procedure are bound to the arguments to which the procedure is applied.
+The implementation of the evaluator will depend upon procedures that define the *syntax* of the expressions to be evaluated. We will use data abstraction to make the evaluator independent of the representation of the language.
+*** The core of the Evaluator
+The evaluation process can be described as the interplay between two procedures: *eval* and *apply*.
+**** Eval
+*eval* takes as arguments an expression and an environment.
+***** Primitive expressions
+- For self-evaluating expressions, such as numbers, *eval* returns the expression itself.
+- *eval* must look up variables in the environment to find their values.
+***** Special forms
+- For quoted expressions, *eval* returns the expression that was quoted.
+- An assignment to (or a definition of) a variable must recursively call *eval* to compute the new value to be associated with the  variable. The environment must be modified to change (or create) the binding of the variable.
+- An *if* expression requires special processing of its parts, so as to evaluate the consequent if the predicate is true, and otherwise to evaluate the alternative.
+- A *lambda* expression must be transformed into an applicable procedure by packaging together the parameters and body specified by the *lambda* expression with the environment of the evaluation.
+- A *begin* expression requires evaluating its sequence of expressions in the order in which they appear.
+- A case analysis(cond) is transformed into a nest of *if* expressions and then evaluated.
+***** Combinations
+- For a procedure application, *eval* must recursively evaluate the operator part and the operands of the combination. The resulting procedure and arguments are passed to *apply*, which handles the actual procedure application.
+#+BEGIN_SRC scheme :session *temp*
+(define (eval exp env)
+  (cond ((self-evaluating? exp) exp)
+        ((variable? exp) (lookup-variable-value exp env))
+        ((quoted? exp) (text-of-quotation exp))
+        ((assignment? exp) (eval-assignment exp env))
+        ((definition? exp) (eval-definition exp env))
+        ((if? exp) (eval-if exp env))
+        ((lambda? exp) (make-procedure (lambda-parameters exp)
+                                       (lambda-body exp)
+                                       env))
+        ((begin? exp)
+         (eval-sequence (begin-actions exp) env))
+        ((cond? exp) (eval (cond->if exp) env))
+        ((application? exp)
+         (apply (eval (operator exp) env)))
+        (else
+         (error "Unknown expression type: EVAL" exp))))
+#+END_SRC
+**** Apply
+*apply* takes two arguments
